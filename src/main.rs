@@ -1,5 +1,6 @@
 use std::vec;
 use std::time::Instant;
+use tokio::runtime::Runtime;
 #[allow(unused_imports)]
 use tokio::time::sleep;
 //use futures::stream::StreamExt;
@@ -47,7 +48,6 @@ async fn solve_1d_async(left:&Vec<f64>,right:&Vec<f64>)->f64{
     for l_and_r in left.iter().zip(right_clone.iter_mut()){
         let l = l_and_r.0;
         let r= l_and_r.1;
-
         output += *l * *r;
     }
     return output;
@@ -66,7 +66,7 @@ pub(crate) async fn multi_async(mat_left:&Vec<Vec<f64>>, mat_right:&Vec<Vec<f64>
         }
     }
 
-    return output;
+    output
 }
 
 #[allow(unused)]
@@ -79,7 +79,7 @@ fn rot_90(mat_in:&Vec<Vec<f64>>) -> Vec<Vec<f64>>{
     }
     return vec_out;
 }
-const MATRIX_SIZE: usize = 10000;
+const MATRIX_SIZE: usize = 1000;
 fn main() {
     let mut mat_left  = vec![vec![0f64;MATRIX_SIZE];MATRIX_SIZE];
     let mut mat_right = vec![vec![0f64;MATRIX_SIZE];MATRIX_SIZE];
@@ -91,18 +91,19 @@ fn main() {
     }
     let start_time_no_thread = Instant::now();
     #[allow(unused)]
-    //let no_thread_output = no_thread_mult(&mat_left,&mat_right);
+    let no_thread_output = no_thread_mult(&mat_left,&mat_right);
     let no_thread_time = start_time_no_thread.elapsed();
-    //println!("no_thread_time: {:3}sec", (no_thread_time.as_millis()as f32 )/1000f32 );
+    println!("no_thread_time: {:3}sec", (no_thread_time.as_millis()as f32 )/1000f32 );
 
     let start_time_mult_thread = Instant::now();
+    let rt = Runtime::new().unwrap();
     #[allow(unused)]
-    let async_output = multi_async(&mat_left,&mat_right);
+    let async_output = rt.block_on(multi_async(&mat_left,&mat_right));
     let async_time = start_time_mult_thread.elapsed();
-    println!("async_time: {:.3}ms", (async_time.as_millis()as f32 ));
+    println!("async_time: {:.3}ms", (async_time.as_millis()as f32/1000f32 ));
     
     //print_vec_of_vec(&no_thread_output);
-    //print_vec_of_vec(&mult_thread_output);
+    //print_vec_of_vec(&async_output);
 
     /*
     let temp = vec![ vec![1f64,2f64,3f64],

@@ -1,17 +1,10 @@
 use std::vec;
 use std::time::Instant;
-#[allow(unused_imports)]
 use tokio::runtime::Runtime;
-#[allow(unused_imports)]
-use tokio::task;
-#[allow(unused_imports)]
-use tokio::time::sleep;
 use std::sync::{Arc, Mutex};
-#[allow(unused_imports)]
-use std::thread::{self, Thread};
+use std::thread;
 use std::sync::mpsc;
 
-#[allow(unused)]
 pub(crate) fn no_thread_mult(mat_left:&Vec<Vec<f64>>, mat_right:&Vec<Vec<f64>>) -> Vec<Vec<f64>>{
     let mut output = vec![vec![0f64;MATRIX_SIZE];MATRIX_SIZE];
     let mat_right_rot = rot_90(&mat_right);
@@ -26,7 +19,6 @@ pub(crate) fn no_thread_mult(mat_left:&Vec<Vec<f64>>, mat_right:&Vec<Vec<f64>>) 
 
     return output;
 }
-#[allow(unused)]
 
 pub(crate) fn print_vec_of_vec(vec_in:&Vec<Vec<f64>>){
     for line in vec_in{
@@ -37,9 +29,8 @@ pub(crate) fn print_vec_of_vec(vec_in:&Vec<Vec<f64>>){
     }
     println!();
 }
-#[allow(unused)]
 
-fn solve_1d_mult(left:&Vec<f64>,mut right:&Vec<f64>)->f64{
+fn solve_1d_mult(left:&Vec<f64>,right:&Vec<f64>)->f64{
     let mut output: f64 = 0f64;
     let mut right_clone = right.clone();
     for l_and_r in left.iter().zip(right_clone.iter_mut()){
@@ -48,7 +39,6 @@ fn solve_1d_mult(left:&Vec<f64>,mut right:&Vec<f64>)->f64{
     return output;
 }
 
-#[allow(unused)]
 async fn solve_1d_async(left:&Vec<f64>,right:&Vec<f64>)->f64{
     let mut output: f64 = 0f64;
     let mut right_clone = right.clone();
@@ -60,7 +50,6 @@ async fn solve_1d_async(left:&Vec<f64>,right:&Vec<f64>)->f64{
     return output;
 }
 
-#[allow(unused)]
 pub(crate) async fn multi_async(mat_left:&Vec<Vec<f64>>, mat_right:&Vec<Vec<f64>>) -> Vec<Vec<f64>>{
     let mut output = vec![vec![0f64;MATRIX_SIZE];MATRIX_SIZE];
     let mat_right_rot = rot_90(&mat_right);
@@ -75,7 +64,6 @@ pub(crate) async fn multi_async(mat_left:&Vec<Vec<f64>>, mat_right:&Vec<Vec<f64>
     output
 }
 
-#[allow(unused)]
 fn rot_90(mat_in:&Vec<Vec<f64>>) -> Vec<Vec<f64>>{
     let mut vec_out = vec![vec![0f64;mat_in.len()];mat_in[0].len()];
     for i in 0..mat_in.len(){
@@ -178,7 +166,7 @@ fn multi_thread(x: &[Vec<f64>], y: &[Vec<f64>]) -> Vec<Vec<f64>> {
 
 }
 
-const MATRIX_SIZE: usize = 2000;
+const MATRIX_SIZE: usize = 1000;
 fn main() {
     let mut mat_left  = vec![vec![0f64;MATRIX_SIZE];MATRIX_SIZE];
     let mut mat_right = vec![vec![0f64;MATRIX_SIZE];MATRIX_SIZE];
@@ -188,33 +176,26 @@ fn main() {
             mat_right[i][j] = (i%3  + j) as f64;
         }
     }
-    /*
     let start_time_no_thread = Instant::now();
-    #[allow(unused)]
     let no_thread_output = no_thread_mult(&mat_left,&mat_right);
     let no_thread_time = start_time_no_thread.elapsed();
     println!("no_thread_time: {:3}sec", (no_thread_time.as_millis()as f32 )/1000f32 );
 
-
     let start_time_async = Instant::now();
     let rt = Runtime::new().unwrap();
-    #[allow(unused)]
     let async_output = rt.block_on(multi_async(&mat_left,&mat_right));
     let async_time = start_time_async.elapsed();
     println!("async_time: {:.3}sec", (async_time.as_millis()as f32/1000f32 ));
-     */
+    
     let start_time_thread = Instant::now();
-    #[allow(unused)]
     let thread_output = multi_thread_pool(&mat_left,&mat_right);
     let thread_time = start_time_thread.elapsed();
     println!("thread_time: {:.3}sec", (thread_time.as_millis()as f32/1000f32 ));
 
-    /* 
     if MATRIX_SIZE < 5{
         print_vec_of_vec(&no_thread_output);
         print_vec_of_vec(&async_output);
         print_vec_of_vec(&thread_output);
     }
-    */
 
 }
